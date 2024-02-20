@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Card</title>
+<style>
+    body {
+        font-family: Cairo, sans-serif;
+        background-color: #f4f4f4;
+    }
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-container {
+        margin-bottom: 20px;
+    }
+    .form-row {
+        margin-bottom: 10px;
+    }
+    .dimension-inputs {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .dimension-input {
+        display: flex;
+        flex-direction: column;
+        margin-right: 10px;
+        flex-basis: calc(50% - 10px); /* Adjusted width */
+        position: relative;
+    }
+    .dimension-input input {
+        width: calc(100% - 0em); /* Adjusted width */
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    .dimension-input label {
+        margin-top: 5px;
+        position: absolute;
+        right: 10px;
+    }
+    .dimension-input:last-child {
+        margin-right: 0;
+    }
+    .dimension-label {
+        text-align: center;
+    }
+    .summary-tab {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    .summary-tab table {
+        width: 100%;
+    }
+    .summary-tab th,
+    .summary-tab td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .summary-tab th {
+        background-color: #f2f2f2;
+    }
+    .total-btn-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .error-message {
+        color: red;
+        margin-top: 5px;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #F96E4;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #F96E46;
+    }
+    /* Style the collapsible section */
+    .collapsible {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        position: relative; /* Added */
+    }
+
+    /* Style the content of the collapsible section */
+    .content {
+        padding: 0 18px;
+        display: none;
+        overflow: hidden;
+        background-color: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    /* Change the color of the button when the collapsible section is active */
+    .active, .collapsible:hover {
+        background-color: #ccc;
+    }
+
+    /* Style the dropdown arrow icon */
+    .arrow-down {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h6 style="text-align: center;">Enter your measurements to get a Quote Quickly! No obligation quote emailed direct to you, easy.
+
+Sales tax may be applicable, calculated at checkout.</h6>
+    
+    <div class="form-container">
+        <div class="form-row">
+            <p>Window 1</p>
+            <div class="dimension-inputs">
+                <div class="dimension-input">
+                    <input type="text" name="height[]" placeholder="" required>
+                    <label>in</label>
+                    <span class="dimension-label">Height</span>
+                </div>
+                <div class="dimension-input">
+                    <input type="text" name="width[]" placeholder="" required>
+                    <label>in</label>
+                    <span class="dimension-label">Width</span>
+                </div>
+            </div>
+        </div>
+        <div class="error-message" id="error-message" style="display: none;">Please fill both height and width fields.</div>
+    </div>
+    
+    <div class="total-btn-container">
+        <button id="add-more-btn" style="background-color: #000000;">Add Another window</button>
+        <button id="calculate-total-btn" style="background-color: #000000;">Calculate Cost</button>
+    </div>
+
+    <!-- Collapsible section for summary -->
+    <button class="collapsible active">Summary<span class="arrow-down">&#9660;</span></button>
+    <div class="content" style="display: block;"> <!-- Added inline style to display initially -->
+        <div id="summary-tab" class="summary-tab">
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+                <!-- <tr>
+                    <td>Height</td>
+                    <td id="total-height">0</td>
+                </tr>
+                <tr>
+                    <td>Width</td>
+                    <td id="total-width" style="display: none;">0</td>
+                </tr> -->
+                <tr>
+                    <td>Total Windows</td>
+                    <td id="total-windows">0</td>
+                </tr>
+                <tr>
+                    <td>Total Price</td>
+                    <td id="total-area">0</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var windowCount = 1; // Track the number of windows added
+
+    document.getElementById("add-more-btn").addEventListener("click", function() {
+        var formContainer = document.querySelector(".form-container");
+        var formRow = document.createElement("div");
+        formRow.classList.add("form-row");
+
+        var label = document.createElement("p");
+        label.textContent = "Window " + (windowCount + 1); // Display the window number
+
+        var dimensionInputs = document.createElement("div");
+        dimensionInputs.classList.add("dimension-inputs");
+
+        var heightInputDiv = document.createElement("div");
+        heightInputDiv.classList.add("dimension-input");
+        var heightInput = document.createElement("input");
+        heightInput.type = "text";
+        heightInput.name = "height[]";
+        heightInput.placeholder = "IN";
+        heightInput.required = true;
+        heightInputDiv.appendChild(heightInput);
+        var heightLabel = document.createElement("label");
+        heightLabel.textContent = "in";
+        heightInputDiv.appendChild(heightLabel);
+        var heightLabelText = document.createElement("span");
+        heightLabelText.textContent = "Height";
+        heightLabelText.classList.add("dimension-label");
+        heightInputDiv.appendChild(heightLabelText);
+
+        var widthInputDiv = document.createElement("div");
+        widthInputDiv.classList.add("dimension-input");
+        var widthInput = document.createElement("input");
+        widthInput.type = "text";
+        widthInput.name = "width[]";
+        widthInput.placeholder = "";
+        widthInput.required = true;
+        widthInputDiv.appendChild(widthInput);
+        var widthLabel = document.createElement("label");
+        widthLabel.textContent = "in";
+        widthInputDiv.appendChild(widthLabel);
+        var widthLabelText = document.createElement("span");
+        widthLabelText.textContent = "Width";
+        widthLabelText.classList.add("dimension-label");
+        widthInputDiv.appendChild(widthLabelText);
+
+        dimensionInputs.appendChild(heightInputDiv);
+        dimensionInputs.appendChild(widthInputDiv);
+
+        formRow.appendChild(label);
+        formRow.appendChild(dimensionInputs);
+
+        formContainer.appendChild(formRow);
+
+        windowCount++; // Increment the window count
+    });
+
+    document.getElementById("calculate-total-btn").addEventListener("click", function() {
+        var heightInputs = document.getElementsByName("height[]");
+        var widthInputs = document.getElementsByName("width[]");
+
+        var totalWidth = 0;
+        var totalHeight = 0;
+        var totalWindows = 0;
+
+        var error = false;
+
+        for (var i = 0; i < heightInputs.length; i++) {
+            var height = parseFloat(heightInputs[i].value) || 0;
+            var width = parseFloat(widthInputs[i].value) || 0;
+            totalWidth += width;
+            totalHeight += height;
+            if ((height === 0 && width !== 0) || (height !== 0 && width === 0)) {
+                error = true;
+                break;
+            }
+            if (height > 0 || width > 0) {
+                totalWindows++;
+            }
+        }
+
+        if (error) {
+            document.getElementById("error-message").style.display = "block";
+            return;
+        } else {
+            document.getElementById("error-message").style.display = "none";
+        }
+
+        var totalArea = (totalHeight + totalWidth) * totalWindows;
+
+        // document.getElementById("total-width").textContent = totalWidth;
+        // document.getElementById("total-height").textContent = totalHeight;
+        document.getElementById("total-windows").textContent = totalWindows;
+        document.getElementById("total-area").textContent = totalArea;
+
+        // Show the summary tab
+        document.getElementById("summary-tab").style.display = "block";
+    });
+
+    // Function to toggle the visibility of the collapsible section
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
